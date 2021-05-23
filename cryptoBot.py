@@ -44,7 +44,7 @@ def main():
     bought_at = 0  # last price we bought at
     buy = False
     sell = False
-    monitor = False
+    monitor_buy = False
 
     # Daemon
     while (counter < 17280):
@@ -53,10 +53,14 @@ def main():
         currPrice = cbase.getCurrentPrice(ticker)
         sma = cbase.calculateSMA(ticker, 1)
 
-        if (currPrice <= (0.95) * sma):
-            buy = True
+        if (not monitor_buy and currPrice <= (0.95) * sma):
+            monitor_buy = True
 
-        if (bought_at != 0 and (currPrice > (1.01) * bought_at or currPrice <= (0.98) * bought_at)):
+        if (monitor_buy):
+            if (currPrice > cbase.getPreviousPrice(ticker, 10)):
+                buy = True
+
+        if (bought_at != 0 and (currPrice >= (1.01) * bought_at or currPrice <= (0.98) * bought_at)):
             sell = True
 
         if (buy):
@@ -64,6 +68,7 @@ def main():
                 BALANCE, COINS_HELD = purchase(currPrice, BALANCE, COINS_HELD)
                 bought_at = currPrice
             buy = False
+            monitor_buy = False
         elif (sell):
             if (COINS_HELD > 0):
                 BALANCE, COINS_HELD = sell(currPrice, BALANCE, COINS_HELD)
