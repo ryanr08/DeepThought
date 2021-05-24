@@ -38,6 +38,7 @@ except:
     print("Please set up your API key in key.txt.\nSet your key.txt file as:\nAPI_KEY\nAPI_SECRET\nAPI_PASS")
     sys.exit(1)
 
+# set up timezone
 timezone = pytz.timezone('US/Pacific')
 
 # set up authentication with API key
@@ -73,7 +74,7 @@ def calculateSMA(coin_id, n_days):
     }
 
     res = requests.get(api_url + f'products/{coin_id}/candles' + "?start=" + str(params['start']) + "&end=" + str(params['end']) + "&granularity=" + str(params['granularity']), auth=auth)
-    
+
     # calculate sma based off close values
     sum = 0
     count = 0
@@ -99,27 +100,36 @@ def getAccountInfo():
     r = requests.get(api_url + 'accounts', auth=auth)
     return r.json()
 
-# Place a buy order
-def Buy(coin_id):   
+# Place a buy order, amount in dollars
+def place_limit_buy(coin_id, amount):   
+    
+    currPrice = getCurrentPrice(coin_id)
+    num_tokens = amount // currPrice
+
     order = {
-        'size': 1.0,
-        'price': 1.0,
+        'type': 'limit',
+        'size': num_tokens,
+        'price': currPrice,
         'side': 'buy',
         'product_id': coin_id,
     }
     r = requests.post(api_url + 'orders', json=order, auth=auth)
-    return r.json()
+    return r.json(), amount, num_tokens
 
-# Place a sell order
-def Sell(coin_id):
+# Place a sell order for coin_amt of a given coin_id 
+def place_limit_sell(coin_id, coin_amt):
+
+    currPrice = getCurrentPrice(coin_id)
+
     order = {
-        'size': 1.0,
-        'price': 1.0,
+        'type': 'limit',
+        'size': coin_amt,
+        'price': currPrice,
         'side': 'sell',
         'product_id': coin_id,
     }
     r = requests.post(api_url + 'orders', json=order, auth=auth)
-    return r.json()  
+    return r.json()
 
 # get the price from num_mins ago
 def getPreviousPrice(coin_id, num_mins):
@@ -135,7 +145,3 @@ def getPreviousPrice(coin_id, num_mins):
 
     res = requests.get(api_url + f'products/{coin_id}/candles' + "?start=" + str(params['start']) + "&end=" + str(params['end']) + "&granularity=" + str(params['granularity']), auth=auth)
     return (res.json()[-1][3])
-
-# getting single product data
-# r = requests.get(api_url + 'products/BTC-USD', auth=auth)
-# print(r.json())
