@@ -65,14 +65,16 @@ def main():
             if (currPrice < low_value):
                 low_value = currPrice
 
-            if (currPrice > (1.01) * low_value and currPrice > cbase.getPreviousPrice(ticker, 1)):
+            if (currPrice > (1.01) * low_value and currPrice > cbase.getPreviousPriceAvg(ticker, 5)):
                 to_buy = True
 
         if (monitor_sell):
-            if (currPrice > high_value):   # set highest value reached
+            # record highest value reached
+            if (currPrice > high_value):
                 high_value = currPrice
 
-            if (currPrice <= (0.95) * bought_at or (currPrice <= (0.98) * high_value and currPrice > bought_at) or currPrice >= (1.05) * bought_at):   # minimize losses to 2% max/ sell if price is dropping past the high we reached
+            #    minimize losses to 2% max             sell if price is dropping past the high we reached            # sell if we make 5% profit
+            if (currPrice <= (0.95) * bought_at or (currPrice <= (0.98) * high_value and currPrice > bought_at) or currPrice >= (1.05) * bought_at):   
                 to_sell = True
             
 
@@ -80,17 +82,18 @@ def main():
             if (acct_balance >= currPrice):
                 acct_balance, num_coins = purchase(currPrice, acct_balance, num_coins)
                 bought_at = currPrice
+                high_value = currPrice
             to_buy = False
             monitor_buy = False
-            monitor_sell = True
-            if (currPrice >= high_value):
-                high_value = currPrice
+            monitor_sell = True 
 
         elif (to_sell):
             acct_balance, num_coins = sell(currPrice, acct_balance, num_coins)
             bought_at = 0
             to_sell = False
             monitor_sell = False
+
+
 
 
     acct_balance, num_coins = sell(currPrice, acct_balance, num_coins)
