@@ -2,9 +2,7 @@ import coinbase_api as cbase
 import time
 from datetime import datetime
 
-ticker = "ETH-USD"
-
-# write to the log file
+ticker = "BTC-USD"
 def writelog(input):
     l = open("orders.log", "a")
     l.write(input)
@@ -52,7 +50,7 @@ def main():
 
     # Daemon
     while (counter < 17280):
-        time.sleep(sleep_time)
+        time.sleep(1)
         counter += 1
         currPrice = cbase.getCurrentPrice(ticker)
         sma = cbase.calculateSMA(ticker, 5)
@@ -64,8 +62,8 @@ def main():
         if (monitor_buy):
             if (currPrice < low_value):
                 low_value = currPrice
-
-            if (currPrice > (1.01) * low_value and currPrice > cbase.getPreviousPriceAvg(ticker, 5)):
+                                                #and
+            if (currPrice > (1.01) * low_value or currPrice > cbase.getPreviousPriceAvg(ticker, 5)):
                 to_buy = True
 
         if (monitor_sell):
@@ -92,8 +90,6 @@ def main():
             bought_at = 0
             to_sell = False
             monitor_sell = False
-
-
 
 
     acct_balance, num_coins = sell(currPrice, acct_balance, num_coins)

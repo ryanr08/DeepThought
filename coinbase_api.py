@@ -149,7 +149,7 @@ def getPreviousPrice(coin_id, num_mins):
 # get average price from num_mins ago till now
 def getPreviousPriceAvg(coin_id, num_mins):
     sum = 0
-    for i in range(num_mins):
-        sum += getCurrentPrice(coin_id, i)
+    for i in range(1, num_mins):
+        sum += getPreviousPrice(coin_id, i)
     return sum / num_mins
 
