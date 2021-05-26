@@ -1,4 +1,4 @@
-import json, hmac, hashlib, time, base64, requests, sys, pytz
+import json, hmac, hashlib, time, base64, requests, sys, pytz, os
 from requests.auth import AuthBase
 from datetime import datetime, timedelta
 
@@ -25,17 +25,14 @@ class CoinbaseExchangeAuth(AuthBase):
         })
         return request
 
-# Load in API key data from key.txt located in the current directory
-try:
-    f = open("key.txt", "r")
+# Load in API key data from system environment variables
 
-    API_KEY = str(f.readline())[0:-1]
-    API_SECRET = str(f.readline())[0:-1]
-    API_PASS = str(f.readline())
+API_KEY = os.environ.get('COINBASE_API')
+API_SECRET = os.environ.get('COINBASE_SECRET')
+API_PASS = os.environ.get('COINBASE_PASS')
 
-    f.close()
-except:
-    print("Please set up your API key in key.txt.\nSet your key.txt file as:\nAPI_KEY\nAPI_SECRET\nAPI_PASS")
+if(None in [API_KEY,API_SECRET,API_PASS]):
+    print("Please set up your API key, password, and secret in your system environment variables.")
     sys.exit(1)
 
 # set up timezone
