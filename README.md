@@ -13,3 +13,9 @@ virtual environment and Install the necessary modules.
 
 Next, simply run cryptoBot.py (you can change the balance value and the 
 ticker name in the code) and watch as u make fake money!
+
+To run in the background: 
+
+```
+$ nohup python3 cryptoBot.py &
+```
