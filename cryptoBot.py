@@ -79,7 +79,7 @@ def main():
                 percent_drop_from_high = 0.995
 
             #    minimize losses to 3% max             sell if price is dropping past the high we reached            # sell if we make 5% profit
-            if (currPrice <= (0.97) * bought_at or (currPrice <= (percent_drop_from_high) * high_value and currPrice > (1.03) * bought_at)):   
+            if (currPrice <= (0.97) * bought_at or (currPrice <= (percent_drop_from_high) * high_value and currPrice > (1.015) * bought_at)):   
                 to_sell = True
             
 

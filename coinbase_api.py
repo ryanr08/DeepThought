@@ -32,8 +32,17 @@ API_SECRET = os.environ.get('COINBASE_SECRET')
 API_PASS = os.environ.get('COINBASE_PASS')
 
 if(None in [API_KEY,API_SECRET,API_PASS]):
-    print("Please set up your API key, password, and secret in your system environment variables.")
-    sys.exit(1)
+    try:
+        f = open("key.txt", "r")
+
+        API_KEY = str(f.readline())[0:-1]
+        API_SECRET = str(f.readline())[0:-1]
+        API_PASS = str(f.readline())
+
+        f.close()
+    except:
+        print("Please set up your API key in key.txt or in your enviornment variables.\nSet your key.txt file as:\nAPI_KEY\nAPI_SECRET\nAPI_PASS")
+        sys.exit(1)
 
 # set up timezone
 timezone = pytz.timezone('US/Pacific')
