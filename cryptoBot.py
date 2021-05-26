@@ -2,7 +2,7 @@ import coinbase_api as cbase
 import time
 from datetime import datetime
 
-ticker = "ICP-USD"
+ticker = "FIL-USD"
 def writelog(input):
     l = open("orders.log", "a")
     l.write(input)
@@ -29,7 +29,7 @@ def sell(currentPrice, balance, coins_held):
     print(f"SELL ALL {ticker} at ${currentPrice} each")
     writelog(f"SELL ALL {ticker} at ${currentPrice} each\n")
     writelog(f"balance is at ${balance}\n\n")
-    return balance, coins_held
+    return balance * (99.3), coins_held
 
 def main():
 
@@ -46,16 +46,20 @@ def main():
     monitor_sell = False
     high_value = 0   # highest value reached while we held
     low_value = 0     # lowest value in dip we see
-
+    percent_drop_from_high = 0.99
 
     # Daemon
     while (counter < 25000):
         time.sleep(5)
         counter += 1
         currPrice = cbase.getCurrentPrice(ticker)
-        sma = cbase.calculateSMA(ticker, 5)
+        if (currPrice == -1):
+            continue
 
-        if ((not monitor_buy and not monitor_sell) and currPrice <= (0.98) * sma):
+        sma2 = cbase.calculateSMA(ticker, 2)
+        sma15 = cbase.calculateSMA(ticker, 15)
+
+        if ((not monitor_buy and not monitor_sell) and (currPrice <= (0.97) * sma2 or sma2 < (.98) * sma15)):
             monitor_buy = True
             low_value = currPrice
 
@@ -71,8 +75,11 @@ def main():
             if (currPrice > high_value):
                 high_value = currPrice
 
-            #    minimize losses to 2% max             sell if price is dropping past the high we reached            # sell if we make 5% profit
-            if (currPrice <= (0.965) * bought_at or (currPrice <= (0.99) * high_value and currPrice > bought_at) or currPrice >= (1.05) * bought_at):   
+            if (currPrice >= (1.08) * bought_at):
+                percent_drop_from_high = 0.995
+
+            #    minimize losses to 3% max             sell if price is dropping past the high we reached            # sell if we make 5% profit
+            if (currPrice <= (0.97) * bought_at or (currPrice <= (percent_drop_from_high) * high_value and currPrice > (1.03) * bought_at)):   
                 to_sell = True
             
 

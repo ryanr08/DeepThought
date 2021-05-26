@@ -92,7 +92,7 @@ def getCurrentPrice(coin_id):
         return float(r)
     except:
         print("ERROR getting values from API")
-        exit(1)
+        return -1
 
 
 # Get account information
