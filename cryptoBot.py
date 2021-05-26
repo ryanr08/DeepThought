@@ -2,7 +2,7 @@ import coinbase_api as cbase
 import time
 from datetime import datetime
 
-ticker = "BTC-USD"
+ticker = "ICP-USD"
 def writelog(input):
     l = open("orders.log", "a")
     l.write(input)
@@ -49,13 +49,13 @@ def main():
 
 
     # Daemon
-    while (counter < 17280):
-        time.sleep(1)
+    while (counter < 25000):
+        time.sleep(5)
         counter += 1
         currPrice = cbase.getCurrentPrice(ticker)
         sma = cbase.calculateSMA(ticker, 5)
 
-        if ((not monitor_buy and not monitor_sell) and currPrice <= (0.95) * sma):
+        if ((not monitor_buy and not monitor_sell) and currPrice <= (0.98) * sma):
             monitor_buy = True
             low_value = currPrice
 
@@ -72,7 +72,7 @@ def main():
                 high_value = currPrice
 
             #    minimize losses to 2% max             sell if price is dropping past the high we reached            # sell if we make 5% profit
-            if (currPrice <= (0.95) * bought_at or (currPrice <= (0.98) * high_value and currPrice > bought_at) or currPrice >= (1.05) * bought_at):   
+            if (currPrice <= (0.965) * bought_at or (currPrice <= (0.99) * high_value and currPrice > bought_at) or currPrice >= (1.05) * bought_at):   
                 to_sell = True
             
 
