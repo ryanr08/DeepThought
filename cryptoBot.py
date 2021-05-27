@@ -2,34 +2,29 @@ import coinbase_api as cbase
 import time
 from datetime import datetime
 
-ticker = "FIL-USD"
+ticker = "ADA-USD"
 def writelog(input):
     l = open("orders.log", "a")
     l.write(input)
     l.close()
 
 def purchase(currentPrice, balance, coins_held):
-    num_purchased = 0
-    while (balance >= currentPrice):
-        coins_held += 1
-        balance -= currentPrice
-        num_purchased += 1
+    balance = balance * 0.995
+    coins_held = balance / currentPrice
+    balance = 0
     writelog(str(datetime.now()) + '\n')
-    print(f"BUY {num_purchased} {ticker} at ${currentPrice} each")
-    writelog(f"BUY {num_purchased} {ticker} at ${currentPrice} each\n")
-    writelog(f"balance is at ${balance}\n\n")
+    print(f"BUY {coins_held} {ticker} at ${currentPrice} each")
+    writelog(f"BUY {coins_held} {ticker} at ${currentPrice} each\n")
     return balance, coins_held
 
 
 def sell(currentPrice, balance, coins_held):
-    while(coins_held > 0):
-        coins_held -= 1
-        balance += currentPrice
+    balance = coins_held * currentPrice
     writelog(str(datetime.now()) + '\n')
     print(f"SELL ALL {ticker} at ${currentPrice} each")
     writelog(f"SELL ALL {ticker} at ${currentPrice} each\n")
     writelog(f"balance is at ${balance}\n\n")
-    return balance * (99.3), coins_held
+    return balance * (0.995), coins_held
 
 def main():
 
@@ -37,9 +32,9 @@ def main():
     currPrice = 0
     sleep_time = 5 # number of seconds to wait each iteration
     acct_balance = 100000 # Amount in dollars of available paper money
-    num_coins : int = 0
+    num_coins : float = 0
 
-    bought_at : int = 0  # last price we bought at
+    bought_at : float = 0  # last price we bought at
     to_buy = False
     to_sell = False
     monitor_buy = False

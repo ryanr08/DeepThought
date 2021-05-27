@@ -149,8 +149,12 @@ def getPreviousPrice(coin_id, num_mins):
         'granularity': 60
     }
 
-    res = requests.get(api_url + f'products/{coin_id}/candles' + "?start=" + str(params['start']) + "&end=" + str(params['end']) + "&granularity=" + str(params['granularity']), auth=auth)
-    return (res.json()[-1][3])
+    try:
+        res = requests.get(api_url + f'products/{coin_id}/candles' + "?start=" + str(params['start']) + "&end=" + str(params['end']) + "&granularity=" + str(params['granularity']), auth=auth)
+        return (res.json()[-1][3])
+    except IndexError:
+        print("ERROR getting previous price")
+        return 1000000
 
 # get average price from num_mins ago till now
 def getPreviousPriceAvg(coin_id, num_mins):
