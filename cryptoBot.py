@@ -14,7 +14,7 @@ def purchase(currentPrice, balance, coins_held):
     balance = 0
     writelog(str(datetime.now()) + '\n')
     print(f"BUY {coins_held} {ticker} at ${currentPrice} each")
-    writelog(f"BUY {coins_held} {ticker} at ${currentPrice} each\n")
+    writelog(f"BUY {coins_held} {ticker} at ${currentPrice} each\n\n")
     return balance, coins_held
 
 
@@ -41,7 +41,7 @@ def main():
     monitor_sell = False
     high_value = 0   # highest value reached while we held
     low_value = 0     # lowest value in dip we see
-    percent_drop_from_high = 0.99
+    percent_drop_from_high = 0.98
 
     # Daemon
     while (counter < 25000):
@@ -51,18 +51,19 @@ def main():
         if (currPrice == -1):
             continue
 
-        sma2 = cbase.calculateSMA(ticker, 2)
+        sma_4hr = cbase.calculateSMA(ticker, 0.15)
+        sma1 = cbase.calculateSMA(ticker, 1)
         sma15 = cbase.calculateSMA(ticker, 15)
 
-        if ((not monitor_buy and not monitor_sell) and (currPrice <= (0.97) * sma2 or sma2 < (.98) * sma15)):
+        if ((not monitor_buy and not monitor_sell) and (currPrice <= (0.97) * sma1 or sma1 < (.98) * sma15)):
             monitor_buy = True
             low_value = currPrice
 
         if (monitor_buy):
             if (currPrice < low_value):
                 low_value = currPrice
-                                                #and
-            if (currPrice > (1.01) * low_value or currPrice > cbase.getPreviousPriceAvg(ticker, 5)):
+                                                
+            if (currPrice > (1.01) * low_value and sma_4hr > sma1):
                 to_buy = True
 
         if (monitor_sell):
@@ -70,11 +71,11 @@ def main():
             if (currPrice > high_value):
                 high_value = currPrice
 
-            if (currPrice >= (1.08) * bought_at):
-                percent_drop_from_high = 0.995
+            if (currPrice >= (1.05) * bought_at):
+                percent_drop_from_high = 0.997
 
-            #    minimize losses to 3% max             sell if price is dropping past the high we reached            # sell if we make 5% profit
-            if (currPrice <= (0.97) * bought_at or (currPrice <= (percent_drop_from_high) * high_value and currPrice > (1.015) * bought_at)):   
+            #    minimize losses to 4% max             sell if price is dropping past the high we reached            # sell if we make 5% profit
+            if (currPrice <= (0.96) * bought_at or (currPrice <= (percent_drop_from_high) * high_value and currPrice > (1.015) * bought_at)):   
                 to_sell = True
             
 
