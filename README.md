@@ -10,7 +10,7 @@ financially profitable trades.
 
 1. Create a CoinbasePro account along with an API key. 
 
-2. `git clone https://github.com/ryanr08/CryptoBot.git'
+2. `git clone https://github.com/ryanr08/CryptoBot.git`
 
 3. Run cryptoBot.py: `python3 cryptobot.py`. You can change the balance value and the 
 ticker name in the code and watch as u make fake money!
