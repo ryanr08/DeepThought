@@ -56,7 +56,7 @@ def calculateSMA(coin_id, n_days):
     # get historical data
     granularity = 0
     if (n_days >= 150):
-        granularity = 86400
+        granularity = 86400    # number of seconds in a day
     elif (n_days >= 12):
         granularity = 21600
     elif (n_days > 3):
@@ -84,10 +84,9 @@ def calculateSMA(coin_id, n_days):
     # calculate sma based off close values
     sum = 0
     count = 0
-    sma = 0
     for i in range(len(res.json())):
-        count = count + 1
-        sum = sum + res.json()[i][3]
+        count += 1
+        sum += res.json()[i][3]
     sma = sum / count
     return sma
 
@@ -97,7 +96,7 @@ def getCurrentPrice(coin_id):
         r = requests.get(api_url + f'products/{coin_id}/ticker', auth=auth).json()['price']
         return float(r)
     except:
-        print("ERROR getting values from API")
+        print("ERROR getting values from API.")
         return -1
 
 
@@ -154,7 +153,10 @@ def getPreviousPrice(coin_id, num_mins):
         return (res.json()[-1][3])
     except IndexError:
         print("ERROR getting previous price")
-        return 1000000
+        return -1
+    except KeyError:
+        print("ERROR: GetPreviousPrice() is only able to get information from at most 13 hours ago.")
+        return -1
 
 # get average price from num_mins ago till now
 def getPreviousPriceAvg(coin_id, num_mins):
