@@ -3,3 +3,5 @@ orders.log
 pyvenv.cfg
 nohup.out
 lib64
+*.pyc
+__pycache__

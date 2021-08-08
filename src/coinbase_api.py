@@ -1,6 +1,10 @@
 import json, hmac, hashlib, time, base64, requests, sys, pytz, os
 from requests.auth import AuthBase
 from datetime import datetime, timedelta
+import src.utils as utils
+
+# set up timezone
+timezone = pytz.timezone('US/Pacific')
 
 # Create custom authentication for Exchange
 class CoinbaseExchangeAuth(AuthBase):
@@ -15,7 +19,6 @@ class CoinbaseExchangeAuth(AuthBase):
         hmac_key = base64.b64decode(self.secret_key)
         signature = hmac.new(hmac_key, message.encode(), hashlib.sha256)
         signature_b64 = base64.b64encode(signature.digest()).decode()
-
         request.headers.update({
             'CB-ACCESS-SIGN': signature_b64,
             'CB-ACCESS-TIMESTAMP': timestamp,
@@ -26,7 +29,6 @@ class CoinbaseExchangeAuth(AuthBase):
         return request
 
 # Load in API key data from system environment variables
-
 API_KEY = os.environ.get('COINBASE_API')
 API_SECRET = os.environ.get('COINBASE_SECRET')
 API_PASS = os.environ.get('COINBASE_PASS')
@@ -41,11 +43,8 @@ if(None in [API_KEY,API_SECRET,API_PASS]):
 
         f.close()
     except:
-        print("Please set up your API key in key.txt or in your enviornment variables.\nSet your key.txt file as:\nAPI_KEY\nAPI_SECRET\nAPI_PASS")
+        utils.writelog("Please set up your API key in key.txt or in your enviornment variables.\nSet your key.txt file as:\nAPI_KEY\nAPI_SECRET\nAPI_PASS")
         sys.exit(1)
-
-# set up timezone
-timezone = pytz.timezone('US/Pacific')
 
 # set up authentication with API key
 api_url = 'https://api.pro.coinbase.com/'
@@ -78,17 +77,11 @@ def calculateSMA(coin_id, n_days):
         'end': str(today),
         'granularity': granularity
     }
-
+    # http request
     res = requests.get(api_url + f'products/{coin_id}/candles' + "?start=" + str(params['start']) + "&end=" + str(params['end']) + "&granularity=" + str(params['granularity']), auth=auth)
 
     # calculate sma based off close values
-    sum = 0
-    count = 0
-    for i in range(len(res.json())):
-        count += 1
-        sum += res.json()[i][3]
-    sma = sum / count
-    return sma
+    return sum(res.json()[i][3] for i in range(len(res.json()))) / len(res.json())
 
 # Get the current market price of a specific coin
 def getCurrentPrice(coin_id):
@@ -96,9 +89,8 @@ def getCurrentPrice(coin_id):
         r = requests.get(api_url + f'products/{coin_id}/ticker', auth=auth).json()['price']
         return float(r)
     except:
-        print("ERROR getting values from API.")
+        utils.writelog("ERROR getting values from API.")
         return -1
-
 
 # Get account information
 def getAccountInfo():
@@ -106,30 +98,25 @@ def getAccountInfo():
     return r.json()
 
 # Place a buy order, amount in dollars
-def place_limit_buy(coin_id, amount):   
-    
-    currPrice = getCurrentPrice(coin_id)
-    num_tokens = amount // currPrice
+def place_limit_buy(coin_id, amount, current_price):
+    num_tokens = amount / current_price
 
     order = {
         'type': 'limit',
-        'size': num_tokens,
-        'price': currPrice,
+        'size': round(num_tokens, 3),
+        'price': current_price,
         'side': 'buy',
         'product_id': coin_id,
     }
     r = requests.post(api_url + 'orders', json=order, auth=auth)
     return r.json(), amount, num_tokens
 
-# Place a sell order for coin_amt of a given coin_id 
-def place_limit_sell(coin_id, coin_amt):
-
-    currPrice = getCurrentPrice(coin_id)
-
+# Place a sell order for coin_amt of a given coin_id (coin_amt in units of the coin itself)
+def place_limit_sell(coin_id, coin_amt, current_price):
     order = {
         'type': 'limit',
         'size': coin_amt,
-        'price': currPrice,
+        'price': current_price,
         'side': 'sell',
         'product_id': coin_id,
     }
@@ -152,16 +139,12 @@ def getPreviousPrice(coin_id, num_mins):
         res = requests.get(api_url + f'products/{coin_id}/candles' + "?start=" + str(params['start']) + "&end=" + str(params['end']) + "&granularity=" + str(params['granularity']), auth=auth)
         return (res.json()[-1][3])
     except IndexError:
-        print("ERROR getting previous price")
+        utils.writelog("ERROR getting previous price")
         return -1
     except KeyError:
-        print("ERROR: GetPreviousPrice() is only able to get information from at most 13 hours ago.")
+        utils.writelog("ERROR: GetPreviousPrice() is only able to get information from at most 13 hours ago.")
         return -1
 
 # get average price from num_mins ago till now
 def getPreviousPriceAvg(coin_id, num_mins):
-    sum = 0
-    for i in range(1, num_mins):
-        sum += getPreviousPrice(coin_id, i)
-    return sum / num_mins
-
+    return sum(getPreviousPrice(coin_id, i) for i in range(1, num_mins)) / num_mins

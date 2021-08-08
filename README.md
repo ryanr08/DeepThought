@@ -18,9 +18,9 @@ ticker name in the code and watch as u make fake money!
 To run in the background: 
 
 ```
-$ nohup python3 cryptobot.py &
+nohup python3 cryptobot.py &
 ```
-## Forking!
+## Contributing
 
 Feel free to fork the repository and mess around with it! 
 Also definitely make pull requests if you believe you have some good contributions!
