@@ -8,18 +8,32 @@ financially profitable trades.
 
 ## Set Up and Installation
 
-1. Create a CoinbasePro account along with an API key. 
+1. ###Create a CoinbasePro account along with an API key. 
 
-2. `git clone https://github.com/ryanr08/CryptoBot.git`
+2. ###Install dependencies
+```
+pip install -r requirements.txt
+```
 
-3. Run cryptoBot.py: `python3 cryptobot.py`. You can change the balance value and the 
-ticker name in the code and watch as u make fake money!
+4. ###Initialize API key
+Set up either environment variables for 'COINBASE_API', 'COINBASE_SECRET', and 'COINBASE_PASS'(), or a file in the root named key.txt which contains each of those variables on a seperate line in the listed order.
+
+## Usage
+
+Run cryptoBot.py
+
+```
+python3 cryptobot.py
+```
 
 To run in the background: 
 
 ```
 nohup python3 cryptobot.py &
 ```
+
+You can change the balance value and the ticker name in the code and watch as u make fake money!
+
 ## Contributing
 
 Feel free to fork the repository and mess around with it! 
