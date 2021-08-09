@@ -6,16 +6,16 @@ CryptoBot is a cryptocurrency trading bot.
 It interfaces with Coinbase Pro's API and attempts to make 
 financially profitable trades.
 
-## 1. Set Up and Installation
+## Set Up and Installation
 
-### 2. Create a CoinbasePro account along with an API key. 
+### 1. Create a CoinbasePro account along with an API key. 
 
-### 3. Install dependencies
+### 2. Install dependencies
 ```
 pip install -r requirements.txt
 ```
 
-### 4. Initialize API key
+### 3. Initialize API key
 Set up either environment variables for 'COINBASE_API', 'COINBASE_SECRET', and 'COINBASE_PASS', or a file in the root named key.txt which contains each of those variables on a seperate line in the listed order.
 
 ## Usage
