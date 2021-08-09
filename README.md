@@ -8,25 +8,25 @@ financially profitable trades.
 
 ## Set Up and Installation
 
-1. ###Create a CoinbasePro account along with an API key. 
+### Create a CoinbasePro account along with an API key. 
 
-2. ###Install dependencies
+### Install dependencies
 ```
 pip install -r requirements.txt
 ```
 
-4. ###Initialize API key
+### Initialize API key
 Set up either environment variables for 'COINBASE_API', 'COINBASE_SECRET', and 'COINBASE_PASS'(), or a file in the root named key.txt which contains each of those variables on a seperate line in the listed order.
 
 ## Usage
 
-Run cryptoBot.py
+### Run cryptoBot.py
 
 ```
 python3 cryptobot.py
 ```
 
-To run in the background: 
+### To run in the background: 
 
 ```
 nohup python3 cryptobot.py &
