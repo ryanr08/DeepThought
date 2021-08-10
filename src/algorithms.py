@@ -1,6 +1,6 @@
 from datetime import datetime
 import time
-import src.utils as utils
+import utils as utils
 
 class Algorithm():
     def __init__(self, ticker, account_balance, calculateSMA, buy, sell, getCurrentPrice):
@@ -39,20 +39,21 @@ class HighFreqTrading(Algorithm):
         if (currPrice == -1):
             return
 
-        sma_4hr = self.calculateSMA(self.ticker, 0.15)
-        sma1 = self.calculateSMA(self.ticker, 1)
+        #sma_4hr = self.calculateSMA(self.ticker, 0.15)
+        sma5 = self.calculateSMA(self.ticker, 5)
         sma15 = self.calculateSMA(self.ticker, 15)
 
-        if ((not self.monitor_buy and not self.monitor_sell) and (currPrice <= (0.97) * sma1)):
+        if ((not self.monitor_buy and not self.monitor_sell) and (currPrice <= (0.98) * sma5)):
             self.monitor_buy = True
             self.low_value = currPrice
-            utils.writelog(f"Monitoring {self.ticker} to buy.")
+            self.to_buy = True
+            #utils.writelog(f"Monitoring {self.ticker} to buy.")
 
         elif (self.monitor_buy):
             if (currPrice < self.low_value):
                 self.low_value = currPrice
 
-            if (currPrice > (1.01) * self.low_value and sma_4hr > sma1):
+            if (currPrice > (1.01) * self.low_value): #and sma_4hr > sma1):
                 self.to_buy = True
 
         elif (self.monitor_sell):
@@ -68,7 +69,7 @@ class HighFreqTrading(Algorithm):
                 self.to_sell = True
 
         # If buy condition is set, purchase as much coin as possible
-        if (self.to_buy):
+        elif (self.to_buy):
             if (self.acct_balance >= currPrice):
                 self.num_coins = self.buy(self.ticker, self.acct_balance, currPrice)
                 self.acct_balance = 0
@@ -81,7 +82,7 @@ class HighFreqTrading(Algorithm):
         # If sell condition is set, sell all coins
         elif (self.to_sell):
             self.acct_balance += self.sell(self.ticker, self.num_coins, currPrice)
-            utils.writelog(f"balance is at ${acct_balance}\n")
+            utils.writelog(f"balance is at ${round(self.acct_balance, 2)}\n")
             self.num_coins = 0
             self.bought_at = 0
             self.to_sell = False

@@ -1,6 +1,4 @@
-# CryptoBot
-
-## Intro
+# DeepThought
 
 CryptoBot is a cryptocurrency trading bot. 
 It interfaces with Coinbase Pro's API and attempts to make 

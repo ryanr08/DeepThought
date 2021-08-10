@@ -1,7 +1,7 @@
 import json, hmac, hashlib, time, base64, requests, sys, pytz, os
 from requests.auth import AuthBase
 from datetime import datetime, timedelta
-import src.utils as utils
+import utils
 
 # set up timezone
 timezone = pytz.timezone('US/Pacific')
@@ -35,15 +35,14 @@ API_PASS = os.environ.get('COINBASE_PASS')
 
 if(None in [API_KEY,API_SECRET,API_PASS]):
     try:
-        f = open("key.txt", "r")
-
+        key_path = __file__[:__file__.rindex('/')] + "/../key.txt"
+        f = open(key_path, "r")
         API_KEY = str(f.readline())[0:-1]
         API_SECRET = str(f.readline())[0:-1]
         API_PASS = str(f.readline())
-
         f.close()
     except:
-        utils.writelog("Please set up your API key in key.txt or in your enviornment variables.\nSet your key.txt file as:\nAPI_KEY\nAPI_SECRET\nAPI_PASS")
+        print("Please set up your API key in key.txt or in your enviornment variables.\nSet your key.txt file as:\nAPI_KEY\nAPI_SECRET\nAPI_PASS")
         sys.exit(1)
 
 # set up authentication with API key
@@ -148,3 +147,39 @@ def getPreviousPrice(coin_id, num_mins):
 # get average price from num_mins ago till now
 def getPreviousPriceAvg(coin_id, num_mins):
     return sum(getPreviousPrice(coin_id, i) for i in range(1, num_mins)) / num_mins
+
+# get historical coin data for backtesting
+def getHistoricalData(coin_id, start_days_prior, num_days):
+    granularity = 0
+    if (num_days >= 150):
+        granularity = 86400    # number of seconds in a day
+    elif (num_days >= 12):
+        granularity = 21600
+    elif (num_days > 3):
+        granularity = 3600
+    elif (num_days > 1):
+        granularity = 900
+    elif (num_days > 0.2):
+        granularity = 300
+    else:
+        granularity = 60
+
+    start_date = (datetime.now(tz=timezone) - timedelta(days=start_days_prior))
+    end_date = (start_date + timedelta(days=num_days)).isoformat()
+
+    # set up parameters for API
+    params = {
+        'start': str(start_date),
+        'end': str(end_date),
+        'granularity': granularity
+    }
+
+    try:
+        res = requests.get(api_url + f'products/{coin_id}/candles' + "?start=" + str(params['start']) + "&end=" + str(params['end']) + "&granularity=" + str(params['granularity']), auth=auth)
+        return res.json()
+    except IndexError:
+        utils.writelog("ERROR getting historical data")
+        return -1
+    except KeyError:
+        utils.writelog("ERROR: Too many days in one request")
+        return -1
