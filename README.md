@@ -1,6 +1,6 @@
 # DeepThought
 
-CryptoBot is a cryptocurrency trading bot. 
+DeepThought is a cryptocurrency trading bot. 
 It interfaces with Coinbase Pro's API and attempts to make 
 financially profitable trades.
 
@@ -25,6 +25,15 @@ nohup python3 cryptobot.py &
 ```
 
 You can change the balance value and the ticker name in the code and watch as u make fake money!
+
+### Backtesting
+
+Run backtest.py:
+```
+python3 backtest.py
+```
+
+You can configure the ticker and algorithm to test any algorithm on any ticker's historical data!
 
 ## Contributing
 
