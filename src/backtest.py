@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
 
-ticker = 'XLM-USD'
+ticker = 'ETH-USD'
 
 class BackTest:
     def __init__(self, df):
@@ -63,13 +63,14 @@ def main():
     balance = 100
 
     utils.writelog(f"Running backtesting on {ticker}...")
-    high_frequency_algorithm = alg.HighFreqTrading(ticker, balance, test.calculate_sma, utils.buy, utils.sell, test.get_current_price)
+    # Get the algorithm that we want to test on
+    sample_algorithm = alg.basicTrading(ticker, balance, test.calculate_sma, utils.buy, utils.sell, test.get_current_price)
 
     for i in range(len(df) - 600):
-        high_frequency_algorithm.run()
+        sample_algorithm.run()
 
     # Get test stats
-    acct_balance = high_frequency_algorithm.sell_all() + high_frequency_algorithm.acct_balance
+    acct_balance = sample_algorithm.sell_all() + sample_algorithm.acct_balance
     percent_gain = 100 * (acct_balance - balance) / balance
     final_balance_if_held = (balance / df.close[len(df) - 1]) * df.close[0]
     percent_gain_if_held = round((100 * (final_balance_if_held - balance) / balance), 0)
