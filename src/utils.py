@@ -1,8 +1,10 @@
 from datetime import datetime
+import time
 
 def writelog(input):
     print(input)
-    log = open("orders.log", "a")
+    log_path = __file__[:__file__.rindex('/')] + "/../orders.log"
+    log = open(log_path, "a")
     log.write(input + '\n')
     log.close()
 
@@ -17,10 +19,13 @@ def buy(coin_id, amount, current_price):
 
 # Sell a coin for paper money
 def sell(coin_id, coin_amt, current_price):
+    balance = round(coin_amt * current_price, 3)
     if (coin_amt > 0):
-        balance = round(coin_amt * current_price, 3)
         writelog(str(datetime.now()))
         writelog(f"SELL ALL {coin_id} at ${current_price} each.")
         return balance * (0.995)
     else:
         return 0
+
+def epoch_time_to_human(timestamp):
+    return time.strftime("%b %Y", time.localtime(timestamp))

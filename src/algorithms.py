@@ -1,6 +1,6 @@
 from datetime import datetime
 import time
-import src.utils as utils
+import utils as utils
 
 class Algorithm():
     def __init__(self, ticker, account_balance, calculateSMA, buy, sell, getCurrentPrice):
@@ -39,23 +39,24 @@ class HighFreqTrading(Algorithm):
         if (currPrice == -1):
             return
 
-        sma_4hr = self.calculateSMA(self.ticker, 0.15)
-        sma1 = self.calculateSMA(self.ticker, 1)
+        #sma_4hr = self.calculateSMA(self.ticker, 0.15)
+        sma5 = self.calculateSMA(self.ticker, 5)
         sma15 = self.calculateSMA(self.ticker, 15)
 
-        if ((not self.monitor_buy and not self.monitor_sell) and (currPrice <= (0.97) * sma1)):
+        if ((not self.monitor_buy and not self.monitor_sell) and (currPrice <= (0.98) * sma5)):
             self.monitor_buy = True
             self.low_value = currPrice
-            utils.writelog(f"Monitoring {self.ticker} to buy.")
+            self.to_buy = True
+            #utils.writelog(f"Monitoring {self.ticker} to buy.")
 
-        elif (self.monitor_buy):
+        if (self.monitor_buy):
             if (currPrice < self.low_value):
                 self.low_value = currPrice
 
-            if (currPrice > (1.01) * self.low_value and sma_4hr > sma1):
+            if (currPrice > (1.01) * self.low_value): #and sma_4hr > sma1):
                 self.to_buy = True
 
-        elif (self.monitor_sell):
+        if (self.monitor_sell):
             # record highest value reached
             if (currPrice > self.high_value):
                 self.high_value = currPrice
@@ -79,10 +80,42 @@ class HighFreqTrading(Algorithm):
             self.monitor_sell = True 
 
         # If sell condition is set, sell all coins
-        elif (self.to_sell):
+        if (self.to_sell):
             self.acct_balance += self.sell(self.ticker, self.num_coins, currPrice)
-            utils.writelog(f"balance is at ${acct_balance}\n")
+            utils.writelog(f"balance is at ${round(self.acct_balance, 2)}\n")
             self.num_coins = 0
             self.bought_at = 0
             self.to_sell = False
             self.monitor_sell = False
+
+# Sample trading algorithm that employs DMAC (Double Moving Average Crossover) analysis.
+# This algorithm will buy the coin when the short term SMA crosses under the long term SMA 
+# and then it will sell the coin when the short term SMA is much greater than the long term SMA.
+class basicTrading(Algorithm):
+    def __init__(self, ticker, acct_balance, calculateSMA, buy, sell, getCurrentPrice):
+        super().__init__(ticker, acct_balance, calculateSMA, buy, sell, getCurrentPrice)
+        self.num_coins : float = 0
+        self.holding = False
+    
+    def run(self):
+        # Get the current price of the ticker
+        currPrice = self.getCurrentPrice(self.ticker)
+        if (currPrice == -1):
+            return
+        
+        # calculate short term and long term sma
+        sma3 = self.calculateSMA(self.ticker, 3)    # short term
+        sma50 = self.calculateSMA(self.ticker, 50)  # long term
+
+        # if short term sma < long term, buy
+        if (not self.holding and sma3 < sma50):
+            self.num_coins = self.buy(self.ticker, self.acct_balance, currPrice)
+            self.acct_balance = 0
+            self.holding = True
+        
+        # if short term sma is much greater than long term, sell
+        if (self.holding and sma3 > sma50 * 1.5):
+            self.acct_balance += self.sell(self.ticker, self.num_coins, currPrice)
+            utils.writelog(f"balance is at ${round(self.acct_balance, 2)}\n")
+            self.num_coins = 0
+            self.holding = False

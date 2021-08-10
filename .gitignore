@@ -5,3 +5,6 @@ nohup.out
 lib64
 *.pyc
 __pycache__
+.env
+bin
+*.png
