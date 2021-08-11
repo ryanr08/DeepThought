@@ -7,11 +7,13 @@ from datetime import datetime
 import utils
 
 def main():
-
-    ticker = "XLM-USD"
+    if (len(sys.argv) != 2):
+        print(f"Error with arguments. \nUsage:\n{sys.argv[0]} <ticker>")
+        sys.exit()
+    ticker = sys.argv[1]
     acct_balance = 1000000 # Amount in dollars of available paper money
 
-    high_frequency_algorithm = alg.HighFreqTrading(ticker, acct_balance, cb.calculateSMA, utils.buy, utils.sell, cb.getCurrentPrice)
+    bot = alg.basicTrading(ticker, acct_balance, cb.calculateSMA, utils.buy, utils.sell, cb.getCurrentPrice)
 
     # Daemon
     utils.writelog(f"CryptoBot has started and is actively tracking {ticker}.")
@@ -19,12 +21,12 @@ def main():
     while (counter < 51840):
         counter += 1    # Stops cryptobot from running after 72 hours.
         # Run trading algorithm
-        high_frequency_algorithm.run()
+        bot.run()
         # Run calculations every 5 seconds.
         time.sleep(5)
 
     # Get final balance
-    acct_balance += high_frequency_algorithm.sell_all()
+    acct_balance += bot.sell_all()
     utils.writelog(str(datetime.now()))
     utils.writelog(f"FINAL BALANCE: ${acct_balance}\n")
 

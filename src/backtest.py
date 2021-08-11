@@ -5,8 +5,7 @@ import algorithms as alg
 import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
-
-ticker = 'ETH-USD'
+import sys
 
 class BackTest:
     def __init__(self, df):
@@ -29,12 +28,12 @@ class BackTest:
 def obtain_crypto_dataset(ticker):
     data = []
     i = 4
-    while(i < 1000):
+    while(i < 2000):
         start_days_prior = i
         num_days = 4
         data += cb.getHistoricalData(ticker, start_days_prior, num_days)
         if (len(data) <= 0):
-            utils.writelog(f"Error obtaining historical data. response = {data}")
+            utils.writelog(f"Error obtaining historical data. response = {data}", True)
             print(i)
             break
         i += 4
@@ -42,39 +41,52 @@ def obtain_crypto_dataset(ticker):
     df.to_csv(f"../datasets/{ticker}.csv", mode='a')
     return df
 
-def plot_coin_price(ticker, df):
+def plot_test_results(ticker, df, buy_and_sell_points):
     plt.locator_params(axis="x", nbins=4)
     plt.locator_params(axis="y", nbins=4)
     plt.xlabel("Time")
-    plt.ylabel("Price")
+    plt.ylabel("Price in Dollars")
     plt.plot(df.time, df.close)
     plt.title(f"{ticker} price over time.")
+    #fig, ax = plt.subplots()
     import warnings
     warnings.filterwarnings("ignore")
     plt.axes().set_xticklabels([utils.epoch_time_to_human(x) for x in plt.axes().get_xticks()])
+    plt.axes().set_yticklabels(['$' + str(y) for y in plt.axes().get_yticks()])
+    for point in buy_and_sell_points:
+        (action, (time, price)) = point
+        plt.annotate(action, (time, price))
+    plt.savefig(f"{ticker}-price-graph.png")
 
 def main():
+    if (len(sys.argv) != 2):
+        print(f"Error with arguments. \nUsage:\n{sys.argv[0]} <ticker>")
+        sys.exit()
+    ticker = sys.argv[1]
     try:
         df = pd.read_csv(f"../datasets/{ticker}.csv")
     except:
         df = obtain_crypto_dataset(ticker)
-    
+
     test = BackTest(df)
     balance = 100
-
-    utils.writelog(f"Running backtesting on {ticker}...")
+    utils.writelog(f"Running backtesting on {ticker}...\n", True)
     # Get the algorithm that we want to test on
-    sample_algorithm = alg.basicTrading(ticker, balance, test.calculate_sma, utils.buy, utils.sell, test.get_current_price)
-
-    for i in range(len(df) - 600):
-        sample_algorithm.run()
+    algorithm = alg.HighFreqTrading(ticker, balance, test.calculate_sma, utils.buy, utils.sell, test.get_current_price, test=True)
+    buy_and_sell_points = []
+    for i in range(int(0.95 * len(df))):
+        action, price = algorithm.run()
+        if (action != ""):
+            buy_and_sell_points += tuple([(action, tuple((test.df.time[test.index], price)))])
 
     # Get test stats
-    acct_balance = sample_algorithm.sell_all() + sample_algorithm.acct_balance
+    acct_balance = algorithm.sell_all() + algorithm.acct_balance
     percent_gain = 100 * (acct_balance - balance) / balance
     final_balance_if_held = (balance / df.close[len(df) - 1]) * df.close[0]
     percent_gain_if_held = round((100 * (final_balance_if_held - balance) / balance), 0)
-    utils.writelog(f"Test complete!\nFinal Balance: ${round(acct_balance, 2)}\nPercent gain: {round(percent_gain, 0)}%\nFinal Balance if held: ${round(final_balance_if_held, 2)}\nPercent gain if held: {percent_gain_if_held}%\n")
+    utils.writelog(f"\nTest on {ticker} complete!\nFinal Balance: ${round(acct_balance, 2)}\nPercent gain: {round(percent_gain, 0)}%\nFinal Balance if held: ${round(final_balance_if_held, 2)}\nPercent gain if held: {percent_gain_if_held}%\n", True)
+
+    plot_test_results(ticker, df, buy_and_sell_points)     # plot results
 
 if __name__ == "__main__":
     main()

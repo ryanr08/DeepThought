@@ -1,5 +1,5 @@
 key.txt
-orders.log
+*.log
 pyvenv.cfg
 nohup.out
 lib64

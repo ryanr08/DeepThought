@@ -21,19 +21,19 @@ Set up either environment variables for 'COINBASE_API', 'COINBASE_SECRET', and '
 ### Run cryptoBot.py
 
 ```
-nohup python3 cryptobot.py &
+nohup python3 cryptobot.py <ticker> &
 ```
 
-You can change the balance value and the ticker name in the code and watch as u make fake money!
+You can change the balance value and the algorithm in the code and watch as you make fake money!
 
 ### Backtesting
 
 Run backtest.py:
 ```
-python3 backtest.py
+python3 backtest.py <ticker>
 ```
 
-You can configure the ticker and algorithm to test any algorithm on any ticker's historical data!
+You can configure the algorithm in the code and test it on any ticker's historical data!
 
 ## Contributing
 
