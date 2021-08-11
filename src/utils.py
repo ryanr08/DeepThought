@@ -10,7 +10,7 @@ def writelog(input, test=False):
         log.close()
     else:
         log_path = __file__[:__file__.rindex('/')] + "/backtest.log"
-        log = open(log_path, "w")
+        log = open(log_path, "a")
         log.write(input + '\n')
         log.close()
 

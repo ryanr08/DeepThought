@@ -36,6 +36,7 @@ class basicTrading(Algorithm):
         # calculate short term and long term sma
         sma3 = self.calculateSMA(self.ticker, 3)    # short term
         sma50 = self.calculateSMA(self.ticker, 50)  # long term
+        sma25 = self.calculateSMA(self.ticker, 25)
 
         # if short term sma < long term, buy
         if (not self.holding and sma3 < sma50):
@@ -46,7 +47,7 @@ class basicTrading(Algorithm):
                 return "B", currPrice
         
         # if short term sma is much greater than long term, sell
-        if (self.holding and sma3 > sma50 * 1.8):
+        if (self.holding and currPrice > sma50 * 1.05 and sma3 < sma50):
             self.acct_balance += self.sell(self.ticker, self.num_coins, currPrice, self.test)
             utils.writelog(f"balance is at ${round(self.acct_balance, 2)}\n", self.test)
             self.num_coins = 0

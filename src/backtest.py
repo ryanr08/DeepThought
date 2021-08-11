@@ -10,7 +10,7 @@ import sys
 class BackTest:
     def __init__(self, df):
         self.df = df
-        self.index = len(df) - 500
+        self.index = int(0.85 * len(df))
 
     def calculate_sma(self, coin_id, n_days):
         sma = 0
@@ -28,7 +28,7 @@ class BackTest:
 def obtain_crypto_dataset(ticker):
     data = []
     i = 4
-    while(i < 2000):
+    while(i < 5000):
         start_days_prior = i
         num_days = 4
         data += cb.getHistoricalData(ticker, start_days_prior, num_days)
@@ -72,9 +72,9 @@ def main():
     balance = 100
     utils.writelog(f"Running backtesting on {ticker}...\n", True)
     # Get the algorithm that we want to test on
-    algorithm = alg.HighFreqTrading(ticker, balance, test.calculate_sma, utils.buy, utils.sell, test.get_current_price, test=True)
+    algorithm = alg.basicTrading(ticker, balance, test.calculate_sma, utils.buy, utils.sell, test.get_current_price, test=True)
     buy_and_sell_points = []
-    for i in range(int(0.95 * len(df))):
+    while(test.index >= 10):
         action, price = algorithm.run()
         if (action != ""):
             buy_and_sell_points += tuple([(action, tuple((test.df.time[test.index], price)))])
@@ -82,7 +82,7 @@ def main():
     # Get test stats
     acct_balance = algorithm.sell_all() + algorithm.acct_balance
     percent_gain = 100 * (acct_balance - balance) / balance
-    final_balance_if_held = (balance / df.close[len(df) - 1]) * df.close[0]
+    final_balance_if_held = (balance / df.close[int(0.85 * len(df))]) * df.close[0]
     percent_gain_if_held = round((100 * (final_balance_if_held - balance) / balance), 0)
     utils.writelog(f"\nTest on {ticker} complete!\nFinal Balance: ${round(acct_balance, 2)}\nPercent gain: {round(percent_gain, 0)}%\nFinal Balance if held: ${round(final_balance_if_held, 2)}\nPercent gain if held: {percent_gain_if_held}%\n", True)
 
