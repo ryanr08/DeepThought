@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
 import sys
+import warnings
 
 class BackTest:
     def __init__(self, df):
@@ -32,7 +33,7 @@ def obtain_crypto_dataset(ticker):
         start_days_prior = i
         num_days = 4
         data += cb.getHistoricalData(ticker, start_days_prior, num_days)
-        if (len(data) <= 0):
+        if (len(data) <= 1):
             utils.writelog(f"Error obtaining historical data. response = {data}", True)
             print(i)
             break
@@ -48,15 +49,13 @@ def plot_test_results(ticker, df, buy_and_sell_points):
     plt.ylabel("Price in Dollars")
     plt.plot(df.time, df.close)
     plt.title(f"{ticker} price over time.")
-    #fig, ax = plt.subplots()
-    import warnings
     warnings.filterwarnings("ignore")
     plt.axes().set_xticklabels([utils.epoch_time_to_human(x) for x in plt.axes().get_xticks()])
     plt.axes().set_yticklabels(['$' + str(y) for y in plt.axes().get_yticks()])
     for point in buy_and_sell_points:
         (action, (time, price)) = point
         plt.annotate(action, (time, price))
-    plt.savefig(f"{ticker}-price-graph.png")
+    plt.savefig(f"{ticker}-test-results.png", figsize=(10, 10), dpi=100)
 
 def main():
     if (len(sys.argv) != 2):
@@ -79,6 +78,7 @@ def main():
         if (action != ""):
             buy_and_sell_points += tuple([(action, tuple((test.df.time[test.index], price)))])
 
+    buy_and_sell_points += tuple([('S', tuple((test.df.time[test.index], float(df.close[test.index]))))])
     # Get test stats
     acct_balance = algorithm.sell_all() + algorithm.acct_balance
     percent_gain = 100 * (acct_balance - balance) / balance
