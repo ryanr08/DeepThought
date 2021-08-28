@@ -2,6 +2,7 @@ from datetime import datetime
 import time
 import utils as utils
 
+# Base class for any trading algorithm
 class Algorithm():
     def __init__(self, ticker, account_balance, calculateSMA, buy, sell, getCurrentPrice, test=False):
         self.calculateSMA, self.buy, self.sell, self.getCurrentPrice, self.ticker, self.acct_balance, self.test = \
@@ -128,6 +129,44 @@ class HighFreqTrading(Algorithm):
             self.num_coins = 0
             self.bought_at = 0
             self.to_sell = False
+            if (self.test):
+                return "S", currPrice
+        return "", 0
+
+class DeepThought(Algorithm):
+    def __init__(self, ticker, acct_balance, calculateSMA, buy, sell, getCurrentPrice, test=False):
+        super().__init__(ticker, acct_balance, calculateSMA, buy, sell, getCurrentPrice, test)
+        self.num_coins : float = 0
+        self.holding = False
+        self.bought_at : float = 0
+    
+    def run(self):
+        # Get the current price of the ticker
+        currPrice = self.getCurrentPrice(self.ticker)
+        if (currPrice == -1):
+            return
+        
+        # calculate short term and long term sma
+        sma10 = self.calculateSMA(self.ticker, 10)
+        sma50 = self.calculateSMA(self.ticker, 50)
+        sma25 = self.calculateSMA(self.ticker, 25)
+        sma5 = self.calculateSMA(self.ticker, 5)
+
+        # if short term sma < long term, buy                    # TODO change this to use model
+        if (not self.holding and sma10 < (0.93) * sma50 and currPrice > 1.01 * sma10):
+            self.num_coins = self.buy(self.ticker, self.acct_balance, currPrice, self.test)
+            self.acct_balance = 0
+            self.holding = True
+            self.bought_at = currPrice
+            if (self.test):
+                return "B", currPrice
+
+        # if short term sma is much greater than long term, sell
+        if (self.holding and currPrice > self.bought_at * 1.30 and sma5 > 1.5 * sma25 and currPrice < (0.98) * sma5 and sma10 > 1.8 * sma50):
+            self.acct_balance += self.sell(self.ticker, self.num_coins, currPrice, self.test)
+            utils.writelog(f"balance is at ${round(self.acct_balance, 2)}\n", self.test)
+            self.num_coins = 0
+            self.holding = False
             if (self.test):
                 return "S", currPrice
         return "", 0

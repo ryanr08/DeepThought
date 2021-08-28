@@ -71,7 +71,7 @@ def main():
     balance = 100
     utils.writelog(f"Running backtesting on {ticker}...\n", True)
     # Get the algorithm that we want to test on
-    algorithm = alg.basicTrading(ticker, balance, test.calculate_sma, utils.buy, utils.sell, test.get_current_price, test=True)
+    algorithm = alg.DeepThought(ticker, balance, test.calculate_sma, utils.buy, utils.sell, test.get_current_price, test=True)
     buy_and_sell_points = []
     while(test.index >= 10):
         action, price = algorithm.run()
